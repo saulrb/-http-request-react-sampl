@@ -15,6 +15,7 @@ function App() {
   const [movies, setMovies] = useState([])
   const [isLoiading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [newMovie, setNewMovie] = useState(false)
   const serviceURL = 'https://react-http-f6a65-default-rtdb.firebaseio.com/movies.json' //'https://swapi.dev/api/films
   const fetchMoviesHandler = useCallback(async () => {
     setIsLoading(true)
@@ -42,13 +43,10 @@ function App() {
       setError(error.message)
     }
     setIsLoading(false)
+    setNewMovie(false)
   }, [])
 
-  useEffect(() => {
-    fetchMoviesHandler()
-  }, [fetchMoviesHandler])
-
-  async function addMovieHandler(movie) {
+  const addMovieHandler = useCallback(async movie => {
     console.log(movie)
     const response = await fetch(serviceURL, {
       method: 'POST',
@@ -58,8 +56,12 @@ function App() {
       }
     })
     const data = await response.json()
+    if (response.status === 200 && data !== null) {
+      setNewMovie(true)
+      console.log('new movie')
+    }
     console.log(data)
-  }
+  }, [])
 
   let content = <p>Found no movies.</p>
   if (movies.length > 0) {
@@ -71,6 +73,10 @@ function App() {
   if (isLoiading) {
     content = <p>Loading...</p>
   }
+
+  useEffect(() => {
+    fetchMoviesHandler()
+  }, [fetchMoviesHandler, newMovie])
 
   return (
     <React.Fragment>
